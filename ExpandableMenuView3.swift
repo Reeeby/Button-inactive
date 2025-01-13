@@ -47,30 +47,34 @@ struct ExpandableMenuView3: View {
                     VStack {
                         Spacer()
 
-                        ZStack {
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.white, lineWidth: 2)
-                                .background(
-                                    RoundedRectangle(cornerRadius: 12)
-                                        .fill(Color.gray.opacity(0.8))
-                                )
-                                .frame(width: isExpanded ? 100 : 40, height: isExpanded ? 100 : 60)
-
+                        Button {
                             if !isExpanded {
-                                Image(systemName: "ellipsis")
-                                    .foregroundColor(.white)
-                                    .imageScale(.medium)
-                                    .transition(.scale)
+                                isExpanded = true
+                                resetTimer()  // Start the timer when expanded
                             }
+                        } label: {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(Color.white, lineWidth: 2)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .fill(Color.gray.opacity(0.8))
+                                    )
+                                    .frame(width: isExpanded ? 100 : 40, height: isExpanded ? 100 : 60)
 
-                            if isExpanded {
-                                VStack(spacing: 16) {
-                                    ScrollView {
-                                        VStack(spacing: 16) {
-                                            HStack {
-                                                if !recaps.isEmpty {
-                                                    Button(action: {
-                                                        Task {
+                                if !isExpanded {
+                                    Image(systemName: "ellipsis")
+                                        .foregroundColor(.white)
+                                        .imageScale(.medium)
+                                        .transition(.scale)
+                                } else {
+                                    VStack(spacing: 16) {
+                                        ScrollView {
+                                            VStack(spacing: 16) {
+                                                HStack {
+                                                    if !recaps.isEmpty {
+                                                        Button(action: {
+                                                            Task {
                                                             await likeRecapsModel.toggleLike()
                                                         }
                                                     }) {
@@ -79,69 +83,57 @@ struct ExpandableMenuView3: View {
                                                     }
                                                     Text("\(likeRecapsModel.recap.likes ?? 0)")
                                                         .foregroundColor(.white)
+                                                    }
                                                 }
-                                            }
-                                            .padding(.vertical, 10)
+                                                .padding(.vertical, 10)
 
-                                            HStack {
-                                                Button(action: {
-                                                    showCommentsSheet.toggle()
-                                                }) {
-                                                    Image(systemName: "bubble.left")
+                                                HStack {
+                                                    Button(action: {
+                                                        showCommentsSheet.toggle()
+                                                    }) {
+                                                        Image(systemName: "bubble.left")
+                                                            .foregroundColor(.white)
+                                                            .padding(.vertical, 5)
+                                                    }
+                                                    Text("\(commentsViewModel.commentsCount)")
                                                         .foregroundColor(.white)
-                                                        .padding(.vertical, 5)
                                                 }
-                                                .simultaneousGesture(TapGesture())
-                                                Text("\(commentsViewModel.commentsCount)")
-                                                    .foregroundColor(.white)
-                                            }
 
-                                            Button(action: {
-                                                showLikedUsersSheet.toggle()
-                                            }) {
-                                                Image(systemName: "person.3.fill")
-                                                    .foregroundColor(.white)
-                                            }
-                                            .simultaneousGesture(TapGesture())
-                                            .padding(.vertical, 5)
-
-                                            Button(action: {
-                                                showReportSheet.toggle()
-                                            }) {
-                                                Image(systemName: "flag")
-                                                    .foregroundColor(.white)
-                                            }
-                                            .simultaneousGesture(TapGesture())
-                                            .padding(.vertical, 5)
-
-                                            if currentUser.id == currentRecap.userId {
                                                 Button(action: {
-                                                    showDeleteAlert = true
+                                                    showLikedUsersSheet.toggle()
                                                 }) {
-                                                    Image(systemName: "trash")
-                                                        .foregroundColor(.red)
+                                                    Image(systemName: "person.3.fill")
+                                                        .foregroundColor(.white)
                                                 }
-                                                .simultaneousGesture(TapGesture())
-                                                .padding(.vertical)
+                                                .padding(.vertical, 5)
+
+                                                Button(action: {
+                                                    showReportSheet.toggle()
+                                                }) {
+                                                    Image(systemName: "flag")
+                                                        .foregroundColor(.white)
+                                                }
+                                                .padding(.vertical, 5)
+
+                                                if currentUser.id == currentRecap.userId {
+                                                    Button(action: {
+                                                        showDeleteAlert = true
+                                                    }) {
+                                                        Image(systemName: "trash")
+                                                            .foregroundColor(.red)
+                                                    }
+                                                    .padding(.vertical)
+                                                }
                                             }
+                                            .padding(.vertical)
                                         }
-                                        .padding(.vertical)
+                                        .frame(width: 100)
+                                        .transition(.opacity)
                                     }
-                                    .frame(width: 100)
-                                    .transition(.opacity)
+                                    .scrollIndicators(.hidden)
                                 }
-                                .scrollIndicators(.hidden)
                             }
                         }
-                        .simultaneousGesture(
-                            TapGesture()
-                                .onEnded {
-                                    if !isExpanded {
-                                        isExpanded = true
-                                        resetTimer() // Start the timer when expanded
-                                    }
-                                }
-                        )
                         .frame(width: isExpanded ? 100 : 60, height: isExpanded ? 100 : 60)
                         .animation(.spring(), value: isExpanded)
 
